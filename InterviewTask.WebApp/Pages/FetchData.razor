@@ -1,0 +1,85 @@
+﻿@page "/fetchdata"
+@using InterviewTask.Common.Models.DTOs;
+@using InterviewTask.WebApp.Clients;
+@using MudBlazor;
+@inject AppHttpClient Http
+
+<PageTitle>Statistics</PageTitle>
+
+<h1>Get Statistics</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+
+<div class="m-4">
+
+    <div class="row">
+        <div class="col">
+            <EditForm Model=@model OnValidSubmit="GetAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudStack Row="true" Spacing="4">
+                    <MudSelect T="int" Label="Select" AnchorOrigin="Origin.BottomCenter" @bind-Value="model.StoreId">
+                        @if (storesList != null)
+                        {
+                            @foreach (var option in storesList!)
+                            {
+                                <MudSelectItem Value="@option" />
+                            }
+                        }
+                    </MudSelect>
+                    <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="From:" DateFormat="dd/MM/yyyy" @bind-Date="model.StartDate" />
+                    <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="To:" DateFormat="dd/MM/yyyy" @bind-Date="model.EndDate" />
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Ok</MudButton>
+                </MudStack>
+            </EditForm>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col">
+            @if (!series.Any())
+            {
+                <p><em>No data to display...</em></p>
+            }
+            else
+            {
+                <MudChart ChartType="ChartType.Bar" ChartSeries="@series" XAxisLabels="@xAxisLabels.ToArray()" Width="100%" Height="600px"></MudChart>
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private List<int>? storesList = new List<int>();
+    private List<ChartSeries> series = new List<ChartSeries>();
+    private List<string> xAxisLabels = new List<string>();
+    private StatisticsDTO model = new StatisticsDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ids = await Http.GetStoresListAsync();
+        if (ids != null)
+        {
+            storesList = ids.ToList();
+            model.StoreId = ids.FirstOrDefault();
+        }
+    }
+
+    private async Task GetAsync()
+    {
+        var statistics = await Http.GetStatisticsAsync(model);
+
+        series.Clear();
+
+        if (statistics != null)
+        {
+            var data = statistics.Statistics.Select(s => (double)s.Count * 10).ToArray();
+            var labels = statistics.Statistics.Select(s => s.Date!.Value.ToString("MMM yy")).ToList();
+            var chartSeries = new ChartSeries() { Name = statistics.Name, Data = data };
+            series.Add(chartSeries);
+            xAxisLabels = labels!;
+        }
+    }
+}
