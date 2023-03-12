@@ -5,6 +5,7 @@ using InterviewTask.WebApi.Repositories;
 using InterviewTask.WebApi.Services;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ builder.Services.AddScoped<IStoresService, StoresService>();
 
 builder.Services.AddScoped<IEntriesRepository, EntriesRepository>();
 builder.Services.AddScoped<IStoresRepository, StoresRepository>();
+
+builder.Services.AddLogging();
 
 builder.Services.AddCors(policy =>
 {

@@ -10,11 +10,13 @@ public class EntriesService : IEntriesService
 {
     private readonly IEntriesRepository _repository;
     private readonly IMapper _mapper;
+    private readonly ILogger<EntriesService> _logger;
 
-    public EntriesService(IEntriesRepository repository, IMapper mapper)
+    public EntriesService(IEntriesRepository repository, IMapper mapper, ILogger<EntriesService> logger)
 	{
         _repository = repository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<BaseResponse> AddEntry(EntryDTO entryDTO)
@@ -26,9 +28,10 @@ public class EntriesService : IEntriesService
             var id = await _repository.PostEntry(entry);
             return new BaseResponse { Status = true, Message = null };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new BaseResponse { Status = false, Message = "Exception" };
+            _logger.LogError("{ex}", ex.Message);
+            return new BaseResponse { Status = false, Message = "An unexpected exception occurred." };
         }
     }
 }

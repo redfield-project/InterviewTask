@@ -10,12 +10,14 @@ public class StatisticsService : IStatisticsService
     private readonly IStoresRepository _storeRepository;
     private readonly IEntriesRepository _entriesRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<StatisticsService> _logger;
 
-    public StatisticsService(IStoresRepository storeRepository, IEntriesRepository entriesRepository, IMapper mapper)
+    public StatisticsService(IStoresRepository storeRepository, IEntriesRepository entriesRepository, IMapper mapper, ILogger<StatisticsService> logger)
     {
         _storeRepository = storeRepository;
         _entriesRepository = entriesRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<StatisticsResponse> GetStatistics(int storeId, DateTime startDate, DateTime endDate)
@@ -23,7 +25,7 @@ public class StatisticsService : IStatisticsService
         var store = await _storeRepository.GetStore(storeId);
         if (store == null)
         {
-            return new StatisticsResponse() { Status = false, Message = "Store dont exists." };
+            return new StatisticsResponse() { Status = false, Message = "Store don`t exists." };
         }
 
         var statisticsResponse = _mapper.Map<StatisticsResponse>(store);

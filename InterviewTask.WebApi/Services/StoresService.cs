@@ -10,11 +10,13 @@ public class StoresService : IStoresService
 {
     private readonly IStoresRepository _repository;
     private readonly IMapper _mapper;
+    private readonly ILogger<StoresService> _logger;
 
-    public StoresService(IStoresRepository repository, IMapper mapper)
+    public StoresService(IStoresRepository repository, IMapper mapper, ILogger<StoresService> logger)
     {
         _repository = repository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<ExtendedResponse> AddStore(StoreDTO storeDTO)
@@ -26,9 +28,10 @@ public class StoresService : IStoresService
             var id = await _repository.PostStore(store);
             return new ExtendedResponse { Id = id, Status = true, Message = null };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new ExtendedResponse { Status = false, Message = "Exception" };
+            _logger.LogError("{ex}", ex.Message);
+            return new ExtendedResponse { Status = false, Message = "An unexpected exception occurred." };
         }
     }
 
@@ -41,11 +44,12 @@ public class StoresService : IStoresService
             {
                 return new StoreResponse { Id = store.Id, Name = store.Name, City = store.City, Country = store.Country, Status = true, Message = null };
             }
-            return new StoreResponse { Status = false, Message = "Dont exist" };
+            return new StoreResponse { Status = false, Message = "Store don`t exists." };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new StoreResponse { Status = false, Message = "Exception" };
+            _logger.LogError("{ex}", ex.Message);
+            return new StoreResponse { Status = false, Message = "An unexpected exception occurred." };
         }
     }
 
@@ -65,9 +69,10 @@ public class StoresService : IStoresService
             await _repository.PutStore(id, store);
             return new ExtendedResponse { Id = id, Status = true, Message = null };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new ExtendedResponse { Status = false, Message = "Exception" };
+            _logger.LogError("{ex}", ex.Message);
+            return new ExtendedResponse { Status = false, Message = "An unexpected exception occurred." };
         }
     }
 
@@ -78,9 +83,10 @@ public class StoresService : IStoresService
             await _repository.DeleteStore(id);
             return new BaseResponse { Status = true, Message = null };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new BaseResponse { Status = false, Message = "Exception" };
+            _logger.LogError("{ex}", ex.Message);
+            return new BaseResponse { Status = false, Message = "An unexpected exception occurred." };
         }
     }
 }
